@@ -3,5 +3,9 @@
 
 import mousio.etcd4j.*
 
-println new EtcdClient().version()
+def client = new EtcdClient()
+client.withCloseable {
+    def ver = it.version()
+    println "server: ${ver.server}, cluster: ${ver.cluster}"
+}
 
