@@ -1,5 +1,5 @@
 @Grab(group='org.slf4j', module='slf4j-simple', version='1.7.21')
-@Grab(group='io.fabric8', module='kubernetes-client', version='1.3.102')
+@Grab(group='io.fabric8', module='kubernetes-client', version='1.4.0')
 
 import org.slf4j.*
 import org.slf4j.impl.*
