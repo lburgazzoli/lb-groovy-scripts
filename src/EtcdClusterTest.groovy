@@ -3,8 +3,11 @@
 
 import mousio.etcd4j.*
 
-//def client = new EtcdClient(URI.create("http://127.0.0.1:2379"))
-def client = new EtcdClient()
+def client = new EtcdClient(
+    URI.create("http://192.168.1.100:2379"), 
+    URI.create("http://192.168.1.100:2479"), 
+    URI.create("http://192.168.1.100:2579")
+)
 
 client.withCloseable {
     def ver = it.version()
