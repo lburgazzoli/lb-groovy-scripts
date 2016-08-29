@@ -13,13 +13,8 @@ def ns  = System.getenv('KUBERNETES_NAMESPACE') ?: 'default'
 def cfg = new ConfigBuilder().withNamespace(ns).withMasterUrl(url).build()
 
 new DefaultKubernetesClient(cfg).withCloseable {
-    def map = it.configMaps().withName('map-props2').get()
+    def map = it.configMaps().withName('demo').get()
     map?.data.each {
-        k,v -> log.info("got key=${k}, val=${v}")
-
-        //def p = new Properties()
-        //p.load(new StringReader(v))
-
-        //log.info("got ${p}")
+        k,v -> log.info("data > key=${k}, val=${v}")
     }
 }
