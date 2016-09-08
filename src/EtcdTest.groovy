@@ -10,3 +10,4 @@ client.withCloseable {
     def ver = it.version()
     println "server: ${ver.server}, cluster: ${ver.cluster}"
 }
+
