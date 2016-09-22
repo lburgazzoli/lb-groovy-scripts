@@ -22,8 +22,8 @@ DataSource createDataSource() {
     PGSimpleDataSource ds = new PGSimpleDataSource()
     ds.setDatabaseName('idempotent')
     ds.setServerName('localhost')
-    ds.setUser('postgres')
-    ds.setPassword('pgpass')
+    ds.setUser(args[0])
+    ds.setPassword(args[1])
 
     return ds
 }
