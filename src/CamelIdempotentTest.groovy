@@ -28,32 +28,27 @@ DataSource createDataSource() {
     return ds
 }
 
-int msgId1 = 0
-int msgId2 = 0
-
 Main main = new Main()
 main.addRouteBuilder(new RouteBuilder() {
     @Override
     public void configure() {
         from('timer:sample1?period=1000')
-            .process { it.in.headers['Message-ID'] = msgId1++ }
             .idempotentConsumer(
-                header('Message-ID'),
+                exchangeProperty('CamelTimerCounter'),
                 new JdbcMessageIdRepository(
                     createDataSource(),
                     'idempotent'))
-            .toD('log:${routeId}?level=INFO&showHeaders=true')
+            .log('Got ${routeId} --> ${property.CamelTimerCounter}')
         from('timer:sample2?period=1000')
-            .process { it.in.headers['Message-ID'] = msgId2++ }
             .idempotentConsumer(
-                header('Message-ID'),
+                exchangeProperty('CamelTimerCounter'),
                 new JdbcMessageIdRepository(
                     createDataSource(),
                     'idempotent'))
-            .toD('log:${routeId}?level=INFO&showHeaders=true')
+            .log('Got ${routeId} --> ${property.CamelTimerCounter}')
     }
 })
 
-main.duration = 10
+main.duration = 60
 main.timeUnit = TimeUnit.SECONDS
 main.run()
