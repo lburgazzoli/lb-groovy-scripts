@@ -10,8 +10,10 @@ import org.apache.camel.component.salesforce.internal.dto.NotifyForFieldsEnum
 import org.apache.camel.main.Main
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 import com.thoughtworks.xstream.annotations.XStreamConverter;
+import com.thoughtworks.xstream.annotations.XStreamImplicit;
 import org.apache.camel.component.salesforce.api.PicklistEnumConverter;
 import org.apache.camel.component.salesforce.api.dto.AbstractSObjectBase;
+import org.apache.camel.component.salesforce.api.dto.AbstractQueryRecordsBase;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 // **************************
@@ -26,6 +28,11 @@ public class Case extends AbstractSObjectBase {
     private String subject;
     @JsonProperty("Description")
     String description;
+}
+
+public class CaseRecords extends AbstractQueryRecordsBase {
+    @XStreamImplicit
+    List<Case> records;
 }
 
 // **************************
@@ -61,6 +68,8 @@ m.addRouteBuilder(new RouteBuilder() {
         from('salesforce:camel-test?updateTopic=true&sObjectQuery=SELECT Id FROM Case')
             .setHeader('sObjectQuery')
                 .simple('SELECT Id,CreatedById,CreatedDate,CaseNumber,Subject,Description FROM Case WHERE Id=\'${in.body.id}\'')
+            .setHeader('sObjectClass')
+                .simple(CaseRecords.class.name)
                 .to('log:salesforce-event?level=INFO&showHeaders=true&multiline=true')
             .enrich('salesforce:query')
                 .to('log:salesforce-query?level=INFO&showHeaders=true&multiline=true')
