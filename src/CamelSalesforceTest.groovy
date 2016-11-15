@@ -1,10 +1,11 @@
-import com.fasterxml.jackson.annotation.JsonProperty
-import com.thoughtworks.xstream.annotations.XStreamAlias
-import com.thoughtworks.xstream.annotations.XStreamImplicit
+
 @Grab(group='org.slf4j', module='slf4j-simple', version='1.7.21')
 @Grab(group='org.apache.camel', module='camel-core', version='2.18.0')
 @Grab(group='org.apache.camel', module='camel-salesforce', version='2.18.0')
 
+import com.fasterxml.jackson.annotation.JsonProperty
+import com.thoughtworks.xstream.annotations.XStreamAlias
+import com.thoughtworks.xstream.annotations.XStreamImplicit
 import org.apache.camel.builder.RouteBuilder
 import org.apache.camel.component.salesforce.SalesforceComponent
 import org.apache.camel.component.salesforce.SalesforceEndpointConfig
@@ -13,6 +14,7 @@ import org.apache.camel.component.salesforce.api.dto.AbstractQueryRecordsBase
 import org.apache.camel.component.salesforce.api.dto.AbstractSObjectBase
 import org.apache.camel.component.salesforce.internal.dto.NotifyForFieldsEnum
 import org.apache.camel.main.Main
+
 // **************************
 //
 // **************************
@@ -61,6 +63,15 @@ Main m = new Main()
 m.bind("salesforce", salesforce)
 m.addRouteBuilder(new RouteBuilder() {
     void configure() {
+        from('timer:sf?period=1s')
+            .setBody()
+                .constant('5000Y000001HZ5WQAW')
+            .setHeader('sObjectClass')
+                .simple(Case.class.name)
+            .to('salesforce:getSObject')
+            .to('log:salesforce-query?level=INFO&showHeaders=true&multiline=true');
+
+        /*
         from('salesforce:camel-test?updateTopic=true&sObjectQuery=SELECT Id FROM Case')
             .setHeader('sObjectQuery')
                 .simple('SELECT Id,CreatedById,CreatedDate,CaseNumber,Subject,Description FROM Case WHERE Id=\'${in.body[Id]}\'')
@@ -71,6 +82,7 @@ m.addRouteBuilder(new RouteBuilder() {
                     return e
                  })
             .to('log:salesforce-query?level=INFO&showHeaders=true&multiline=true')
+            */
     }
 })
 
