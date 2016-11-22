@@ -1,41 +1,26 @@
-@Grab(group='org.slf4j', module='slf4j-simple', version='1.7.14')
-@Grab(group='org.apache.camel', module='camel-core', version='2.17.2')
-@Grab(group='org.apache.camel', module='camel-infinispan', version='2.17.2')
+@Grab(group='org.slf4j', module='slf4j-simple', version='1.7.21')
+@Grab(group='org.apache.camel', module='camel-core', version='2.18.0')
+@Grab(group='org.apache.camel', module='camel-infinispan', version='2.18.0')
 
-import org.apache.camel.impl.*
 import org.apache.camel.builder.RouteBuilder
+import org.apache.camel.component.infinispan.InfinispanConstants
+import org.apache.camel.main.Main
 import org.infinispan.client.hotrod.RemoteCacheManager
-import org.infinispan.client.hotrod.configuration.ConfigurationBuilder
+import org.infinispan.manager.DefaultCacheManager
 
-def ctx = new DefaultCamelContext()
-ctx.addRoutes(new RouteBuilder() {
+Main m = new Main()
+m.bind("cache-manager",  Boolean.getBoolean('infinispan.remote') ? new RemoteCacheManager() : new DefaultCacheManager())
+m.addRouteBuilder(new RouteBuilder() {
     void configure() {
-        from("direct:run")
-            .to("infinispan:localhost")
-                .to("log:camel-groovy?level=INFO&showAll=true&multiline=true");
+        from('timer:test?period=1s')
+            .setHeader(InfinispanConstants.OPERATION, constant(InfinispanConstants.PUT))
+            .setHeader(InfinispanConstants.KEY, constant('CamelTimerCounter'))
+            .setHeader(InfinispanConstants.VALUE, simple('val: ${exchangeProperty[CamelTimerCounter]}'))
+            .to('infinispan:infinispan?cacheContainer=#cache-manager&cacheName=misc_cache')
+              .setHeader(InfinispanConstants.OPERATION, constant(InfinispanConstants.GET))
+              .to('infinispan:infinispan?cacheContainer=#cache-manager&cacheName=misc_cache')
+                .log('get result: ${header[CamelInfinispanOperationResult]}')
     }
 })
 
-ctx.start()
-
-def template = ctx.createProducerTemplate()
-
-
-template.sendBodyAndHeaders("direct:run", null, [ 
-    'CamelInfinispanCacheName' : 'idempotent',
-    'CamelInfinispanOperation' : 'CamelInfinispanOperationPut',
-    'CamelInfinispanKey'       : 'key', 
-    'CamelInfinispanValue'     : UUID.randomUUID().toString() 
-])
-
-/*
-template.sendBodyAndHeaders("direct:run", null, [ 
-    'CamelInfinispanCacheName' : 'idempotent',
-    'CamelInfinispanOperation' : 'CamelInfinispanOperationGet',
-    'CamelInfinispanKey'       : 'key' 
-])
-*/
-
-Thread.sleep(5000)
-
-ctx.stop()
+m.run(args)

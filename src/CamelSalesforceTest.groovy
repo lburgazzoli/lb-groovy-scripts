@@ -21,6 +21,10 @@ import org.apache.camel.main.Main
 
 @XStreamAlias("Case")
 public class Case extends AbstractSObjectBase {
+    Case(String Id) {
+        setId(Id)
+    }
+
     @JsonProperty("CaseNumber")
     String caseNumber;    
     @JsonProperty("Subject")
@@ -65,9 +69,9 @@ m.addRouteBuilder(new RouteBuilder() {
     void configure() {
         from('timer:sf?period=1s')
             .setBody()
-                .constant('5000Y000001HZ5WQAW')
-            .setHeader('sObjectClass')
-                .simple(Case.class.name)
+                .constant(new Case('5000Y000001HZ5WQAW'))
+            .setHeader('sObjectName')
+                .constant('Pippo')
             .to('salesforce:getSObject')
             .to('log:salesforce-query?level=INFO&showHeaders=true&multiline=true');
 
