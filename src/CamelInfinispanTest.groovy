@@ -12,13 +12,18 @@ Main m = new Main()
 m.bind("cache-manager",  Boolean.getBoolean('infinispan.remote') ? new RemoteCacheManager() : new DefaultCacheManager())
 m.addRouteBuilder(new RouteBuilder() {
     void configure() {
-        from('timer:test?period=1s')
+
+        from('timer:test-put?period=1s')
             .setHeader(InfinispanConstants.OPERATION, constant(InfinispanConstants.PUT))
             .setHeader(InfinispanConstants.KEY, constant('CamelTimerCounter'))
             .setHeader(InfinispanConstants.VALUE, simple('val: ${exchangeProperty[CamelTimerCounter]}'))
             .to('infinispan:infinispan?cacheContainer=#cache-manager&cacheName=misc_cache')
-              .setHeader(InfinispanConstants.OPERATION, constant(InfinispanConstants.GET))
-              .to('infinispan:infinispan?cacheContainer=#cache-manager&cacheName=misc_cache')
+                .log('put result: ${header[CamelInfinispanOperationResult]}')
+
+        from('timer:test-get?period=2s')
+            .setHeader(InfinispanConstants.OPERATION, constant(InfinispanConstants.GET))
+            .setHeader(InfinispanConstants.KEY, constant('CamelTimerCounter'))
+            .to('infinispan:infinispan?cacheContainer=#cache-manager&cacheName=misc_cache')
                 .log('get result: ${header[CamelInfinispanOperationResult]}')
     }
 })
