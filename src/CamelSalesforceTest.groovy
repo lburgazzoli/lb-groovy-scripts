@@ -38,6 +38,21 @@ public class CaseRecords extends AbstractQueryRecordsBase {
     List<Case> records;
 }
 
+@XStreamAlias("CaseComment")
+public class CaseComment extends AbstractSObjectBase {
+    @JsonProperty("ParentId")
+    private String parentId;
+    @JsonProperty("IsPublished")
+    private Boolean isPublished;
+    @JsonProperty("CommentBody")
+    private String commentBody;
+}
+
+public class CaseCommentRecords extends AbstractQueryRecordsBase {
+    @XStreamImplicit
+    List<CaseComment> records;
+}
+
 // **************************
 //
 // **************************
@@ -48,6 +63,7 @@ ecfg.notifyForOperationDelete = true
 ecfg.notifyForOperationUndelete = true
 ecfg.notifyForOperationUpdate = true
 ecfg.notifyForFields = NotifyForFieldsEnum.ALL
+ecfg.apiVersion = '38.0'
 
 def lcfg = new SalesforceLoginConfig()
 lcfg.userName = System.getenv('SALESFORCE_USERNAME')
@@ -68,11 +84,9 @@ m.bind("salesforce", salesforce)
 m.addRouteBuilder(new RouteBuilder() {
     void configure() {
         from('timer:sf?period=1s')
-            .setBody()
-                .constant(new Case('5000Y000001HZ5WQAW'))
-            .setHeader('sObjectName')
-                .constant('Pippo')
-            .to('salesforce:getSObject')
+            .setHeader('sObjectClass').constant(CaseCommentRecords.class.name)
+            .setHeader('sObjectQuery').constant('SELECT Id, ParentId, CommentBody FROM CaseComment')
+            .to('salesforce:query')
             .to('log:salesforce-query?level=INFO&showHeaders=true&multiline=true');
 
         /*
