@@ -1,6 +1,6 @@
 @Grab(group='org.slf4j', module='slf4j-simple', version='1.7.21')
-@Grab(group='org.apache.camel', module='camel-core', version='2.18.0')
-@Grab(group='org.apache.camel', module='camel-csv', version='2.18.0')
+@Grab(group='org.apache.camel', module='camel-core', version='2.19.0-SNAPSHOT')
+@Grab(group='org.apache.camel', module='camel-csv', version='2.19.0-SNAPSHOT')
 
 import org.apache.camel.dataformat.csv.CsvDataFormat
 import org.apache.camel.impl.DefaultCamelContext
