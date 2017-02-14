@@ -1,7 +1,7 @@
 
-@Grab(group='org.slf4j', module='slf4j-simple', version='1.7.21')
-@Grab(group='org.apache.camel', module='camel-core', version='2.18.0')
-@Grab(group='org.apache.camel', module='camel-salesforce', version='2.18.0')
+@Grab(group='org.slf4j', module='slf4j-simple', version='1.7.22')
+@Grab(group='org.apache.camel', module='camel-core', version='2.18.2')
+@Grab(group='org.apache.camel', module='camel-salesforce', version='2.18.2')
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.thoughtworks.xstream.annotations.XStreamAlias
@@ -38,21 +38,6 @@ public class CaseRecords extends AbstractQueryRecordsBase {
     List<Case> records;
 }
 
-@XStreamAlias("CaseComment")
-public class CaseComment extends AbstractSObjectBase {
-    @JsonProperty("ParentId")
-    private String parentId;
-    @JsonProperty("IsPublished")
-    private Boolean isPublished;
-    @JsonProperty("CommentBody")
-    private String commentBody;
-}
-
-public class CaseCommentRecords extends AbstractQueryRecordsBase {
-    @XStreamImplicit
-    List<CaseComment> records;
-}
-
 // **************************
 //
 // **************************
@@ -83,13 +68,15 @@ Main m = new Main()
 m.bind("salesforce", salesforce)
 m.addRouteBuilder(new RouteBuilder() {
     void configure() {
+        from('salesforce:camel-test?updateTopic=true&sObjectQuery=SELECT Id FROM CaseComment')
+            .to('log:salesforce-query?level=INFO&showHeaders=true&multiline=true')
+
+        /*
         from('timer:sf?period=1s')
             .setHeader('sObjectClass').constant(CaseCommentRecords.class.name)
             .setHeader('sObjectQuery').constant('SELECT Id, ParentId, CommentBody FROM CaseComment')
             .to('salesforce:query')
             .to('log:salesforce-query?level=INFO&showHeaders=true&multiline=true');
-
-        /*
         from('salesforce:camel-test?updateTopic=true&sObjectQuery=SELECT Id FROM Case')
             .setHeader('sObjectQuery')
                 .simple('SELECT Id,CreatedById,CreatedDate,CaseNumber,Subject,Description FROM Case WHERE Id=\'${in.body[Id]}\'')
