@@ -94,7 +94,7 @@ def tpl = ctx.createProducerTemplate()
         it,
         tpl.request('direct:create', {
             it.in.body = new CaseComment()
-            it.in.body.parentId = '5000Y000001JYh8QAG'
+            it.in.body.parentId = '5000Y000001JYhIQAW'
             it.in.body.commentBody = UUID.randomUUID().toString()
         }).in.getBody(String.class))
 
