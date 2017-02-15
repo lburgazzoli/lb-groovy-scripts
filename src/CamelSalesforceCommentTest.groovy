@@ -5,8 +5,6 @@
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.thoughtworks.xstream.annotations.XStreamAlias
 import com.thoughtworks.xstream.annotations.XStreamImplicit
-import org.apache.camel.Exchange
-import org.apache.camel.Processor
 import org.apache.camel.builder.RouteBuilder
 import org.apache.camel.component.salesforce.SalesforceComponent
 import org.apache.camel.component.salesforce.SalesforceEndpointConfig
@@ -17,7 +15,6 @@ import org.apache.camel.component.salesforce.internal.dto.NotifyForFieldsEnum
 import org.apache.camel.impl.DefaultCamelContext
 import org.apache.camel.impl.SimpleRegistry
 import org.slf4j.LoggerFactory
-
 // **************************
 //
 // **************************
@@ -74,12 +71,15 @@ ctx.addRoutes(new RouteBuilder() {
         from('direct:create')
             .to("salesforce:createSObject")
         from('direct:query')
-            .to('salesforce:query?sObjectClass=CaseCommentRecords&sObjectQuery=SELECT Id, ParentId FROM CaseComment')
-            .log('query ${body}')
+            .setHeader('sObjectClass').constant('CaseCommentRecords')
+            .setHeader('sObjectQuery').constant('SELECT Id, ParentId FROM CaseComment')
+            .to('salesforce:query')
+            .log('query ${body.records.size()} ${body}')
             .loopDoWhile(simple('${body.done} == false'))
+                .setHeader('sObjectClass').constant('CaseCommentRecords')
                 .setHeader('sObjectQuery').simple('${body.nextRecordsUrl}')
-                .to('salesforce:queryMore?sObjectClass=CaseCommentRecords')
-                .log('queryMore ${body}')
+                .to('salesforce:queryMore')
+                .log('queryMore ${body.records.size()} ${body}')
             .end()
     }
 })
@@ -89,15 +89,14 @@ ctx.start()
 
 def tpl = ctx.createProducerTemplate()
 
-(1..1000).each {
-    log.info ("{} - {}", it, tpl.request('direct:create', new Processor() {
-        @Override
-        void process(Exchange exchange) throws Exception {
-            exchange.in.body = new CaseComment()
-            exchange.in.body.parentId = '5000Y000001HfASQA0'
-            exchange.in.body.commentBody = UUID.randomUUID().toString()
-        }
-    }).in.getBody(String.class))
+(1..10).each {
+    log.info ("{} - {}",
+        it,
+        tpl.request('direct:create', {
+            it.in.body = new CaseComment()
+            it.in.body.parentId = '5000Y000001JYh8QAG'
+            it.in.body.commentBody = UUID.randomUUID().toString()
+        }).in.getBody(String.class))
 
     Thread.sleep(50)
 }
