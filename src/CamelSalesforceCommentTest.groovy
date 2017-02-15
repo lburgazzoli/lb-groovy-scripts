@@ -2,37 +2,15 @@
 @Grab(group='org.apache.camel', module='camel-core', version='2.18.2')
 @Grab(group='org.apache.camel', module='camel-salesforce', version='2.18.2')
 
-import com.fasterxml.jackson.annotation.JsonProperty
-import com.thoughtworks.xstream.annotations.XStreamAlias
-import com.thoughtworks.xstream.annotations.XStreamImplicit
 import org.apache.camel.builder.RouteBuilder
 import org.apache.camel.component.salesforce.SalesforceComponent
 import org.apache.camel.component.salesforce.SalesforceEndpointConfig
 import org.apache.camel.component.salesforce.SalesforceLoginConfig
-import org.apache.camel.component.salesforce.api.dto.AbstractQueryRecordsBase
-import org.apache.camel.component.salesforce.api.dto.AbstractSObjectBase
 import org.apache.camel.component.salesforce.internal.dto.NotifyForFieldsEnum
 import org.apache.camel.impl.DefaultCamelContext
 import org.apache.camel.impl.SimpleRegistry
 import org.slf4j.LoggerFactory
-// **************************
-//
-// **************************
-
-@XStreamAlias("CaseComment")
-class CaseComment extends AbstractSObjectBase {
-    @JsonProperty("ParentId")
-    String parentId
-    @JsonProperty("IsPublished")
-    Boolean isPublished
-    @JsonProperty("CommentBody")
-    String commentBody
-}
-
-class CaseCommentRecords extends AbstractQueryRecordsBase {
-    @XStreamImplicit
-    List<CaseComment> records;
-}
+import salesforce.CaseComment
 
 // **************************
 //

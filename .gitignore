@@ -28,5 +28,4 @@ target/
 data/
 out/
 
-.gitignore
 MyTest.groovy
