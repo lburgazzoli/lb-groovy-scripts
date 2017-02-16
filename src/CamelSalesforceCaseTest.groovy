@@ -10,9 +10,10 @@ import org.apache.camel.component.salesforce.api.SalesforceException
 import org.apache.camel.component.salesforce.internal.dto.NotifyForFieldsEnum
 import org.apache.camel.impl.DefaultCamelContext
 import org.apache.camel.impl.SimpleRegistry
-// **************************
+
+// *****************************************************************************
 //
-// **************************
+// *****************************************************************************
 
 def ecfg = new SalesforceEndpointConfig()
 ecfg.notifyForOperationCreate = true
@@ -33,9 +34,9 @@ salesforce.loginConfig = lcfg
 salesforce.config = ecfg
 salesforce.packages = [ 'salesforce' ]
 
-// **************************
+// *****************************************************************************
 //
-// **************************
+// *****************************************************************************
 
 def reg = new SimpleRegistry()
 reg.put("salesforce", salesforce)
