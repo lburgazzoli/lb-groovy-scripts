@@ -10,28 +10,23 @@ import org.apache.camel.component.salesforce.api.SalesforceException
 import org.apache.camel.component.salesforce.internal.dto.NotifyForFieldsEnum
 import org.apache.camel.impl.DefaultCamelContext
 import org.apache.camel.impl.SimpleRegistry
-
 // *****************************************************************************
 //
 // *****************************************************************************
 
-def ecfg = new SalesforceEndpointConfig()
-ecfg.notifyForOperationCreate = true
-ecfg.notifyForOperationDelete = true
-ecfg.notifyForOperationUndelete = true
-ecfg.notifyForOperationUpdate = true
-ecfg.notifyForFields = NotifyForFieldsEnum.ALL
-ecfg.apiVersion = '38.0'
-
-def lcfg = new SalesforceLoginConfig()
-lcfg.userName = System.getenv('SALESFORCE_USERNAME')
-lcfg.password = System.getenv('SALESFORCE_PASSWORD')
-lcfg.clientId = System.getenv('SALESFORCE_CLIENTID')
-lcfg.clientSecret = System.getenv('SALESFORCE_CLIENTSECRET')
-
 def salesforce = new SalesforceComponent()
-salesforce.loginConfig = lcfg
-salesforce.config = ecfg
+salesforce.loginConfig = new SalesforceLoginConfig()
+salesforce.loginConfig.userName = System.getenv('SALESFORCE_USERNAME')
+salesforce.loginConfig.password = System.getenv('SALESFORCE_PASSWORD')
+salesforce.loginConfig.clientId = System.getenv('SALESFORCE_CLIENTID')
+salesforce.loginConfig.clientSecret = System.getenv('SALESFORCE_CLIENTSECRET')
+salesforce.config = new SalesforceEndpointConfig()
+salesforce.config.notifyForOperationCreate = true
+salesforce.config.notifyForOperationDelete = true
+salesforce.config.notifyForOperationUndelete = true
+salesforce.config.notifyForOperationUpdate = true
+salesforce.config.notifyForFields = NotifyForFieldsEnum.ALL
+salesforce.config.apiVersion = '38.0'
 salesforce.packages = [ 'salesforce' ]
 
 // *****************************************************************************

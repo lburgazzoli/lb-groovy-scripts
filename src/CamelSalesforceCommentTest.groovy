@@ -10,8 +10,6 @@ import org.apache.camel.component.salesforce.internal.dto.NotifyForFieldsEnum
 import org.apache.camel.impl.DefaultCamelContext
 import org.apache.camel.impl.SimpleRegistry
 import org.slf4j.LoggerFactory
-import salesforce.CaseComment
-
 // **************************
 //
 // **************************
@@ -46,6 +44,7 @@ reg.put("salesforce", salesforce)
 def ctx = new DefaultCamelContext(reg)
 ctx.addRoutes(new RouteBuilder() {
     void configure() {
+        /*
         from('direct:create')
             .to("salesforce:createSObject")
         from('direct:query')
@@ -59,12 +58,17 @@ ctx.addRoutes(new RouteBuilder() {
                 .to('salesforce:queryMore')
                 .log('queryMore ${body.records.size()} ${body}')
             .end()
+        */
+
+        from('salesforce:comments?updateTopic=true&sObjectQuery=SELECT Id FROM Comment_Event__c')
+            .log('${body}')
     }
 })
 
 ctx.start()
 
 
+/*
 def tpl = ctx.createProducerTemplate()
 
 (1..10).each {
@@ -81,10 +85,10 @@ def tpl = ctx.createProducerTemplate()
 
 tpl.sendBody('direct:query', 'go!')
 
-/*
+*/
+
 for (int i=0; i < 1000; i++) {
     Thread.sleep(1000)
 }
-*/
 
 ctx.stop()
