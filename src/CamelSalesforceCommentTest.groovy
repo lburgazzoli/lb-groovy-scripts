@@ -10,81 +10,52 @@ import org.apache.camel.component.salesforce.internal.dto.NotifyForFieldsEnum
 import org.apache.camel.impl.DefaultCamelContext
 import org.apache.camel.impl.SimpleRegistry
 import org.slf4j.LoggerFactory
+
 // **************************
 //
 // **************************
-
-def ecfg = new SalesforceEndpointConfig()
-ecfg.notifyForOperationCreate = true
-ecfg.notifyForOperationDelete = true
-ecfg.notifyForOperationUndelete = true
-ecfg.notifyForOperationUpdate = true
-ecfg.notifyForFields = NotifyForFieldsEnum.ALL
-ecfg.apiVersion = '39.0'
-
-def lcfg = new SalesforceLoginConfig()
-lcfg.userName = System.getenv('SALESFORCE_USERNAME')
-lcfg.password = System.getenv('SALESFORCE_PASSWORD')
-lcfg.clientId = System.getenv('SALESFORCE_CLIENTID')
-lcfg.clientSecret = System.getenv('SALESFORCE_CLIENTSECRET')
 
 def salesforce = new SalesforceComponent()
-salesforce.loginConfig = lcfg
-salesforce.config = ecfg
+salesforce.loginConfig = new SalesforceLoginConfig()
+salesforce.loginConfig.userName = System.getenv('SALESFORCE_USERNAME')
+salesforce.loginConfig.password = System.getenv('SALESFORCE_PASSWORD')
+salesforce.loginConfig.clientId = System.getenv('SALESFORCE_CLIENTID')
+salesforce.loginConfig.clientSecret = System.getenv('SALESFORCE_CLIENTSECRET')
+salesforce.config = new SalesforceEndpointConfig()
+salesforce.config.notifyForOperationCreate = true
+salesforce.config.notifyForOperationDelete = true
+salesforce.config.notifyForOperationUndelete = true
+salesforce.config.notifyForOperationUpdate = true
+salesforce.config.notifyForFields = NotifyForFieldsEnum.ALL
+salesforce.config.apiVersion = '39.0'
+salesforce.packages = [ 'salesforce' ]
 
-def log = LoggerFactory.getLogger("camel-salesforce-comment")
 
 // **************************
 //
 // **************************
 
+def log = LoggerFactory.getLogger("camel-salesforce-comment")
 def reg = new SimpleRegistry()
 reg.put("salesforce", salesforce)
 
 def ctx = new DefaultCamelContext(reg)
 ctx.addRoutes(new RouteBuilder() {
     void configure() {
-        /*
-        from('direct:create')
-            .to("salesforce:createSObject")
-        from('direct:query')
-            .setHeader('sObjectClass').constant('CaseCommentRecords')
-            .setHeader('sObjectQuery').constant('SELECT Id, ParentId FROM CaseComment')
-            .to('salesforce:query')
-            .log('query ${body.records.size()} ${body}')
-            .loopDoWhile(simple('${body.done} == false'))
-                .setHeader('sObjectClass').constant('CaseCommentRecords')
-                .setHeader('sObjectQuery').simple('${body.nextRecordsUrl}')
-                .to('salesforce:queryMore')
-                .log('queryMore ${body.records.size()} ${body}')
-            .end()
-        */
-
-        from('salesforce:comments?updateTopic=true&sObjectQuery=SELECT Id FROM Comment_Event__c')
+        from('salesforce:comments?updateTopic=true&sObjectQuery=SELECT Id, CommentId__c FROM Comment_Event__c')
+            .to("log:salesforce-comments?level=INFO&showHeaders=true&multiline=true")
+            .setHeader('sObjectName').constant('CaseComment')
+            .setBody().simple('${body[CommentId__c]}')
+            .enrich('salesforce:getSObject')
             .log('${body}')
     }
 })
 
 ctx.start()
 
-
 /*
 def tpl = ctx.createProducerTemplate()
-
-(1..10).each {
-    log.info ("{} - {}",
-        it,
-        tpl.request('direct:create', {
-            it.in.body = new CaseComment()
-            it.in.body.parentId = '5000Y000001JYhIQAW'
-            it.in.body.commentBody = UUID.randomUUID().toString()
-        }).in.getBody(String.class))
-
-    Thread.sleep(50)
-}
-
 tpl.sendBody('direct:query', 'go!')
-
 */
 
 for (int i=0; i < 1000; i++) {
