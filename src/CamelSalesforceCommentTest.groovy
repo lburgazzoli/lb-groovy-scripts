@@ -28,6 +28,7 @@ salesforce.config.notifyForOperationUndelete = true
 salesforce.config.notifyForOperationUpdate = true
 salesforce.config.notifyForFields = NotifyForFieldsEnum.ALL
 salesforce.config.apiVersion = '39.0'
+salesforce.config.initialReplayIdMap = [ '/topic/comments-1' : -2, '/topic/comments-2' : -1]
 salesforce.packages = [ 'salesforce' ]
 
 
@@ -42,12 +43,20 @@ reg.put("salesforce", salesforce)
 def ctx = new DefaultCamelContext(reg)
 ctx.addRoutes(new RouteBuilder() {
     void configure() {
-        from('salesforce:comments?updateTopic=true&sObjectQuery=SELECT Id, CommentId__c FROM Comment_Event__c')
-            .to("log:salesforce-comments?level=INFO&showHeaders=true&multiline=true")
+        from('salesforce:comments-1?updateTopic=true&sObjectQuery=SELECT Id, CommentId__c FROM Comment_Event__c')
+            .to('direct:process')
+        from('salesforce:comments-2?updateTopic=true&sObjectQuery=SELECT Id FROM Comment_Event__c\'')
+            .to('direct:process')
+
+        from('direct:process')
+            .to("log:salesforce-comments?level=INFO&showHeaders=false&multiline=false")
+            .filter()
+                .simple('${body[CommentId__c]} != null')
             .setHeader('sObjectName').constant('CaseComment')
-            .setBody().simple('${body[CommentId__c]}')
+            .setBody()
+                .simple('${body[CommentId__c]}')
             .enrich('salesforce:getSObject')
-            .log('${body}')
+            .to("log:salesforce-comments?level=INFO&showHeaders=false&multiline=false")
     }
 })
 
