@@ -1,6 +1,6 @@
-@Grab(group='org.slf4j', module='slf4j-simple', version='1.7.22')
-@Grab(group='org.apache.camel', module='camel-core', version='2.18.2')
-@Grab(group='org.apache.camel', module='camel-salesforce', version='2.18.2')
+@Grab(group='org.slf4j', module='slf4j-simple', version='1.7.21')
+@Grab(group='org.apache.camel', module='camel-core', version='2.19.0-SNAPSHOT')
+@Grab(group='org.apache.camel', module='camel-salesforce', version='2.19.0-SNAPSHOT')
 
 import org.apache.camel.builder.RouteBuilder
 import org.apache.camel.component.salesforce.SalesforceComponent
@@ -28,7 +28,7 @@ salesforce.config.notifyForOperationUndelete = true
 salesforce.config.notifyForOperationUpdate = true
 salesforce.config.notifyForFields = NotifyForFieldsEnum.ALL
 salesforce.config.apiVersion = '39.0'
-salesforce.config.initialReplayIdMap = [ '/topic/comments-1' : -2, '/topic/comments-2' : -1]
+salesforce.config.initialReplayIdMap = [ '/topic/comments-1' : -2L, '/topic/comments-2' : -1L]
 salesforce.packages = [ 'salesforce' ]
 
 
@@ -45,7 +45,7 @@ ctx.addRoutes(new RouteBuilder() {
     void configure() {
         from('salesforce:comments-1?updateTopic=true&sObjectQuery=SELECT Id, CommentId__c FROM Comment_Event__c')
             .to('direct:process')
-        from('salesforce:comments-2?updateTopic=true&sObjectQuery=SELECT Id FROM Comment_Event__c\'')
+        from('salesforce:comments-2?updateTopic=true&sObjectQuery=SELECT Id FROM Comment_Event__c')
             .to('direct:process')
 
         from('direct:process')
