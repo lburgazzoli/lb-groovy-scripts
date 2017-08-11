@@ -1,9 +1,9 @@
-import okhttp3.Credentials
 @Grab(group='org.slf4j', module='slf4j-simple', version='1.7.21')
 @Grab(group='com.squareup.retrofit2', module='retrofit', version='2.1.0')
 @Grab(group='com.squareup.retrofit2', module='converter-jackson', version='2.1.0')
 @Grab(group='com.squareup.okhttp3', module='logging-interceptor', version='3.3.0')
 
+import okhttp3.Credentials
 import okhttp3.OkHttpClient
 import retrofit2.Call
 import retrofit2.Retrofit
@@ -13,11 +13,11 @@ import retrofit2.http.Headers
 import retrofit2.http.POST
 import retrofit2.http.Path
 
-def userName = System.getenv('SERVICENOW_CAMEL_USERNAME')
-def password = System.getenv('SERVICENOW_CAMEL_PASSWORD')
+def userName = System.getenv('jboss-fuse-jenkins')
+def password = System.getenv('8xdLM9i4bxsgetdwyhJxVedAk-Kve7tk')
 def baseUrl  = System.getenv('SERVICENOW_API_URL') + '/'
 
-public interface ImportSet {
+interface ImportSet {
     @Headers([ 'Accept: application/json', 'Produces: application/json' ])
     @POST('/api/now/import/{table}')
     Call<Map<String, Object>> create(@Path('table') String table, @Body Map<String, Object> incident)
