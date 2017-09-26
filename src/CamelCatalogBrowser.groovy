@@ -1,8 +1,10 @@
 @Grab(group='org.apache.camel', module='camel-catalog', version='2.20.0-SNAPSHOT')
 @Grab(group='org.apache.commons', module='commons-csv', version='1.2')
+@Grab(group='org.apache.commons', module='commons-configuration2', version='2.1.1')
 
 import groovy.json.JsonSlurper
 import org.apache.camel.catalog.DefaultCamelCatalog
+import org.apache.commons.configuration2.INIConfiguration
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVParser
 
@@ -11,6 +13,15 @@ import java.nio.file.Paths
 def slurper  = new JsonSlurper()
 def catalog  = new DefaultCamelCatalog()
 def template = new TreeMap()
+
+def eapComponent = new INIConfiguration()
+def eapComponentUrl = new URL('https://raw.githubusercontent.com/wildfly-extras/wildfly-camel/master/catalog/src/main/resources/component.roadmap')
+def eapComponentUrlCnx = eapComponentUrl.openConnection()
+def eapComponentUrlReader = new BufferedReader(new InputStreamReader(eapComponentUrlCnx.getInputStream()))
+
+
+def eapDataformat  = new INIConfiguration()
+def eapDataformatUrl = new URL('https://raw.githubusercontent.com/wildfly-extras/wildfly-camel/master/catalog/src/main/resources/dataformat.roadmap')
 
 Paths.get('data/camel-support-matrix-orig.csv').withReader { reader ->
     CSVParser csv = new CSVParser(reader, CSVFormat.DEFAULT)
